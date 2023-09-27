@@ -24,25 +24,20 @@ $sourceFoldersToBackup = @(
 $backupDestination = "C:\Path\To\Backup"
 $logFilePath = "C:\Path\To\Log\"
 ```
-**Run the Script** 
+### Run the Script
+- Execute the script to start the backup process.
 
-  Execute the script to start the backup process.
+### Backup Folder
+- A backup folder with a timestamp (e.g., yyyy-MM-dd_HH-mm-ss) is created in the specified backup destination.
 
-**Backup Folder** 
+### Copying Files
+- The script copies the contents of the source folders to the backup folder while maintaining the folder structure.
 
-  A backup folder with a timestamp (e.g., yyyy-MM-dd_HH-mm-ss) is created in the specified backup destination.
+### Verification
+- Compares the source and backup folder contents, ensuring data integrity.
 
-**Copying Files** 
-
-  The script copies the contents of the source folders to the backup folder while maintaining the folder structure.
-
-**Verification** 
-
-  Compares the source and backup folder contents, ensuring data integrity.
-
-**Logging** 
-
-  Logs are generated, capturing the backup process and any verification discrepancies.
+### Logging
+- Logs are generated, capturing the backup process and any verification discrepancies.
 
 ## Requirements
 PowerShell (Windows PowerShell or PowerShell Core)
