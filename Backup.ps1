@@ -8,8 +8,6 @@ $logFilePath = "C:\Path\To\Log\"
 # Create backup destination folder if it doesn't exist
 if (-not (Test-Path -Path $backupDestination -PathType Container)) {
     New-Item -Path $backupDestination -ItemType Directory
-} else {
-    Write-Host "Backup directory exists"
 }
 
 # Create backup folder for current backup
@@ -55,6 +53,7 @@ foreach ($folderToBackup in $sourceFoldersToBackup) {
             # Display and log a simple error message
             $errorMessage = "Error: $($_.Exception.Message)"
             Write-Host $errorMessage -ForegroundColor Red 
+            
             Add-Content -Path $logFilePathAndName -Value $errorMessage
         }
     }
