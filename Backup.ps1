@@ -1,16 +1,9 @@
-﻿# Automated folder/file backup
+# Automated folder/file backup
 
 # Enter your backup related directories here
 $sourceFoldersToBackup = @("C:\Path\To\Files", "C:\Path\To\Files2", "C:\Path\To\Files3")
 $backupDestination = "C:\Path\To\Backup"
 $logFilePath = "C:\Path\To\Log\"
-
-# Folder contents for verification
-$sourceFolderContents = @{}
-$backupFolderContents = @{}
-
-# If script should output to the console
-$printToConsole = $true
 
 # Create backup destination folder if it doesn't exist
 if (-not (Test-Path -Path $backupDestination -PathType Container)) {
@@ -30,59 +23,39 @@ New-Item -Path $logFilePath -ItemType Directory
 # Create empty log file 
 $logFilePathAndName = Join-Path -Path $logFilePath -ChildPath ("Backup_Log_" + (Split-Path $backupFolder -Leaf) + ".log")
 New-Item -Path $logFilePathAndName -ItemType File
+Write-Host
 
-# Copy source folders to new backup folder and populate FolderContents hash tables for verification
+# Copy source folders to new backup folder and verify and log
 foreach ($folderToBackup in $sourceFoldersToBackup) {
     # Get folder to be copied name
     $folderJustCopied = Split-Path $folderToBackup -Leaf
-    Copy-Item -Path $folderToBackup -Destination $backupFolder -Recurse
 
-    # Create hash tables for verification and sort for readability
-    $sourceFolderContents[$folderJustCopied] = Get-ChildItem -Path $folderToBackup -Recurse | Sort-Object Fullname
-    $backupFolderContents[$folderJustCopied] = Get-ChildItem -Path (Join-Path -Path $backupFolder -ChildPath $folderJustCopied) -Recurse | Sort-Object Fullname
-}
+    # Create the folder the files belong to
+    $newFolder = Join-Path -Path $backupFolder -ChildPath $folderJustCopied
 
-Write-Host "Backup complete, starting verification"
-Write-Host
-
-# Check if backup had any files it could not copy
-$validationResults = Compare-Object @($sourceFolderContents.Keys) @($backupFolderContents.Keys)
-if ($validationResults.Count -eq 0) {
-    Write-Host "Backup completed successfully, outputting results to log"
-    Write-Host
-} else {
-    Write-Host "Backup completed with errors, outputting results to log"
-    Write-Host
-}
-
-# Create log file and print results to terminal
-foreach ($key in $backupFolderContents.Keys) {
-    $value = $backupFolderContents[$key]
-
-    foreach ($file in $value) {
-        if ($printToConsole) {
-            Write-Host "Success " -ForegroundColor Green -NoNewline
-            Write-Host "Folder: $key     File: $file"
-        } else {
-            $line = "Success Folder: $key     File: $file"
-        }
-
-        # Check if there is a mismatch in the validation results
-        $mismatch = $validationResults | Where-Object { $_.InputObject -eq $key }
-
-        if ($mismatch) {
-            if ($printToConsole) {
-                Write-Host "Failed  " -ForegroundColor Red -NoNewline
-                Write-Host "Folder: $key     File: $file"
-            } else {
-                $line = "Failed: Folder: $key     File: $file"
+    # Copy each item of folders to backup, log errors
+    foreach ($item in Get-ChildItem -Path $folderToBackup -File -Recurse) {
+        # Catch an error copying files and then continue copying
+        try {
+            # If the folder the files belong to is already created, dont create
+            if (-not (Test-Path $newFolder -PathType Container)) {
+                New-Item $newFolder -ItemType Directory
             }
-        }
 
-        Add-Content -Path $logFilePathAndName -Value $line
+            # Copy item to folder
+            Copy-Item -Path $item.FullName -Destination $newFolder -Force -ErrorAction Stop
+
+            # Print to console current files being copied
+            Write-Host "Success " -ForegroundColor Green -NoNewline
+            Write-Host "Copied: $($item.FullName)"
+
+            # Add result of copy to the log
+            Add-Content -Path $logFilePathAndName -Value "Success Copied: $($item.FullName)"
+        } catch {
+            # Display and log a simple error message
+            $errorMessage = "Error: $($_.Exception.Message)"
+            Write-Host $errorMessage -ForegroundColor Red 
+            Add-Content -Path $logFilePathAndName -Value $errorMessage
+        }
     }
 }
-
-Write-Host
-Write-Host "Log completed"
-
