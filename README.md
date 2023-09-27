@@ -34,7 +34,7 @@ $logFilePath = "C:\Path\To\Log\"
 - The script copies the contents of the source folders to the backup folder while maintaining the folder structure.
 
 ### Verification
-- Compares the source and backup folder contents, ensuring data integrity.
+- Display and log errors when copying files
 
 ### Logging
 - Logs are generated, capturing the backup process and any verification discrepancies.
