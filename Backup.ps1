@@ -1,9 +1,9 @@
 # Automated folder/file backup
 
 # Enter your backup related directories here
-$sourceFoldersToBackup = @("C:\Path\To\Files", "C:\Path\To\Files2", "C:\Path\To\Files3")
+$sourceFoldersToBackup = @("C:\Users\Derrek Russell\Documents\SenecaWork")
 $backupDestination = "C:\Path\To\Backup"
-$logFilePath = "C:\Path\To\Log\"
+$logFilePath = "C:\Path\To\Logs\"
 
 # Create backup destination folder if it doesn't exist
 if (-not (Test-Path -Path $backupDestination -PathType Container)) {
@@ -11,8 +11,7 @@ if (-not (Test-Path -Path $backupDestination -PathType Container)) {
 }
 
 # Create backup folder for current backup
-$backupFolder = Join-Path -Path $backupDestination -ChildPath (Get-Date -Format "yyyy-MM-dd_HH-mm-ss")
-New-Item -Path $backupFolder -ItemType Directory
+$backupFolder = Get-Date -Format "yyyy-MM-dd_HH-mm-ss"
 
 # Create Log file path for current backup
 $logFilePath = Join-Path -Path $logFilePath -ChildPath (Split-Path $backupFolder -Leaf)
@@ -26,18 +25,19 @@ Write-Host
 # Copy source folders to new backup folder and verify and log
 foreach ($folderToBackup in $sourceFoldersToBackup) {
     # Get folder to be copied name
-    $folderJustCopied = Split-Path $folderToBackup -Leaf
-
-    # Create the folder the files belong to
-    $newFolder = Join-Path -Path $backupFolder -ChildPath $folderJustCopied
+    $parentFolder = Split-Path $folderToBackup -Leaf
 
     # Copy each item of folders to backup, log errors
     foreach ($item in Get-ChildItem -Path $folderToBackup -File -Recurse) {
+        $parentPath = $item.Directory -replace ".*\\$parentFolder", $parentFolder
+
         # Catch an error copying files and then continue copying
         try {
-            # If the folder the files belong to is already created, dont create
-            if (-not (Test-Path $newFolder -PathType Container)) {
-                New-Item $newFolder -ItemType Directory
+            # Create the folder the current file belongs to
+            $newFolder = Join-Path -Path $backupDestination -ChildPath $backupFolder
+            $newFolder = Join-Path -Path $newFolder -ChildPath $parentPath
+            if (-not(Test-Path -Path $newFolder -PathType Container)) {
+                New-Item -Path $newFolder -ItemType Directory
             }
 
             # Copy item to folder
