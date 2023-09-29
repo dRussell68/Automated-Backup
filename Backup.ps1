@@ -1,7 +1,7 @@
 # Automated folder/file backup
 
 # Enter your backup related directories here
-$sourceFoldersToBackup = @("C:\Users\Derrek Russell\Documents\SenecaWork")
+$sourceFoldersToBackup = @("C:\Path\To\Files", "C:\Path\To\Files2", "C:\Path\To\Files3")
 $backupDestination = "C:\Path\To\Backup"
 $logFilePath = "C:\Path\To\Logs\"
 
