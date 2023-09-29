@@ -9,9 +9,6 @@ $logFilePath = "C:\Path\To\Logs"
 
 $invalidPaths = New-Object System.Collections.Generic.List[string]
 
-# Backup folder name for current backup
-$backupFolder = Get-Date -Format "yyyy-MM-dd_HH-mm-ss"
-
 # Check if source backup folders are valid
 foreach ($path in $sourceFoldersToBackup) {
     if (-not(Test-Path -Path $path -PathType Container)) {
@@ -29,6 +26,9 @@ if ($invalidPaths.Length -gt 0) {
     Write-Host "Error cannot continue with backup until source backup folder paths are corrected, exiting..." -ForegroundColor Red
     Exit
 }
+
+# Backup folder name for current backup
+$backupFolder = Get-Date -Format "yyyy-MM-dd_HH-mm-ss"
 
 # Check if creating log folder and file is possible
 try {
