@@ -29,6 +29,7 @@ foreach ($folderToBackup in $sourceFoldersToBackup) {
 
     # Copy each item of folders to backup, log errors
     foreach ($item in Get-ChildItem -Path $folderToBackup -File -Recurse) {
+        # Get proper folder structure for use in creating a folder the current item belongs to
         $parentPath = $item.Directory -replace ".*\\$parentFolder", $parentFolder
 
         # Catch an error copying files and then continue copying
