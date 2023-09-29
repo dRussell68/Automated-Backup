@@ -54,7 +54,8 @@ foreach ($folderToBackup in $sourceFoldersToBackup) {
             # Display and log a simple error message
             $errorMessage = "Error: $($_.Exception.Message)"
             Write-Host $errorMessage -ForegroundColor Red 
-            
+
+            # Add result of copy to the log
             Add-Content -Path $logFilePathAndName -Value $errorMessage
         }
     }
