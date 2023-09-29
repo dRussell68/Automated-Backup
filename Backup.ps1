@@ -4,7 +4,9 @@
 $sourceFoldersToBackup = @("C:\Path\To\Files", "C:\Path\To\Files2", "C:\Path\To\Files3")
 $backupDestination = "C:\Path\To\Backup"
 $logFilePath = "C:\Path\To\Logs"
+
 [bool]$disableLogging = $false
+
 $invalidPaths = New-Object System.Collections.Generic.List[string]
 
 # Backup folder name for current backup
