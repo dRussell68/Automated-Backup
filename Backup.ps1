@@ -28,8 +28,6 @@ if ($invalidPaths.Length -gt 0) {
     Exit
 }
 
-
-
 # Check if creating log folder and file is possible
 try {
     # Create Log file path for current backup
