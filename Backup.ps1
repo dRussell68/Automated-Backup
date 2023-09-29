@@ -92,7 +92,6 @@ foreach ($folderToBackup in $sourceFoldersToBackup) {
             Write-Host "Success " -ForegroundColor Green -NoNewline
             Write-Host "Copied: $($item.FullName)"
 
-            
             if (-not $disableLogging) {
                 # Add result of copy to the log
                 Add-Content -Path $logFile -Value "Success Copied: $($item.FullName)"
