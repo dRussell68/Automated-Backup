@@ -5,10 +5,32 @@ $sourceFoldersToBackup = @("C:\Path\To\Files", "C:\Path\To\Files2", "C:\Path\To\
 $backupDestination = "C:\Path\To\Backup"
 $logFilePath = "C:\Path\To\Logs"
 [bool]$disableLogging = $false
+$invalidPaths = New-Object System.Collections.Generic.List[string]
 
 # Backup folder name for current backup
 $backupFolder = Get-Date -Format "yyyy-MM-dd_HH-mm-ss"
 
+# Check if source backup folders are valid
+foreach ($path in $sourceFoldersToBackup) {
+    if (-not(Test-Path -Path $path -PathType Container)) {
+        $invalidPaths.Add($path)
+    }
+}
+
+# If invalid paths are found, let the user know and exit
+if ($invalidPaths.Length -gt 0) {
+    foreach ($path in $invalidPaths) {
+        Write-Host "Invalid source backup path, please correct $path" -ForegroundColor Red
+    }
+
+    Write-Host
+    Write-Host "Error cannot continue with backup until source backup folder paths are corrected, exiting..." -ForegroundColor Red
+    Exit
+}
+
+
+
+# Check if creating log folder and file is possible
 try {
     # Create Log file path for current backup
     $logFilePath = Join-Path -Path $logFilePath -ChildPath (Split-Path $backupFolder -Leaf)
@@ -25,6 +47,7 @@ try {
     $disableLogging = $true
 }
 
+# Check if creating backup folder is possible
 try {
     # Create backup destination folder if it doesn't exist
     if (-not (Test-Path -Path $backupDestination -PathType Container)) {
