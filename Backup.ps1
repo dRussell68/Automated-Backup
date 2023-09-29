@@ -2,29 +2,45 @@
 
 # Enter your backup related directories here
 $sourceFoldersToBackup = @("C:\Path\To\Files", "C:\Path\To\Files2", "C:\Path\To\Files3")
-$backupDestination = "C:\Path\To\Test\Backup"
-$logFilePath = "C:\Path\To\Logs\"
+$backupDestination = "C:\Path\To\Backup"
+$logFilePath = "C:\Path\To\Logs"
+[bool]$disableLogging = $false
+
+# Backup folder name for current backup
+$backupFolder = Get-Date -Format "yyyy-MM-dd_HH-mm-ss"
+
+try {
+    # Create Log file path for current backup
+    $logFilePath = Join-Path -Path $logFilePath -ChildPath (Split-Path $backupFolder -Leaf)
+    New-Item -Path $logFilePath -ItemType Directory
+
+    # Create empty log file 
+    $logFile = Join-Path -Path $logFilePath -ChildPath ("Backup_Log_" + (Split-Path $backupFolder -Leaf) + ".log")
+    New-Item -Path $logFile -ItemType File
+    Write-Host
+} catch {
+    Write-Host "An unexpected error occurred: $($_.Exception.Message) ($logFilePath)" -ForegroundColor Red
+    Write-Host "Will not be able to log backup" -ForegroundColor Red
+    Write-Host
+    $disableLogging = $true
+}
 
 try {
     # Create backup destination folder if it doesn't exist
     if (-not (Test-Path -Path $backupDestination -PathType Container)) {
         New-Item -Path $backupDestination -ItemType Directory
     }
-
-    # Create backup folder for current backup
-    $backupFolder = Get-Date -Format "yyyy-MM-dd_HH-mm-ss"
-
-    # Create Log file path for current backup
-    $logFilePath = Join-Path -Path $logFilePath -ChildPath (Split-Path $backupFolder -Leaf)
-    New-Item -Path $logFilePath -ItemType Directory
-
-    # Create empty log file 
-    $logFilePathAndName = Join-Path -Path $logFilePath -ChildPath ("Backup_Log_" + (Split-Path $backupFolder -Leaf) + ".log")
-    New-Item -Path $logFilePathAndName -ItemType File
-    Write-Host
 } catch {
-    Write-Host "An unexpected error occurred: $($_.Exception.Message)" -ForegroundColor Red
-    Write-Host "Cannot continue with backup, exiting..." -ForegroundColor Red
+    Write-Host "An unexpected error occurred: $($_.Exception.Message) ($backupDestination)" -ForegroundColor Red
+    Write-Host "Cannot continue with backup" -ForegroundColor Red
+    Write-Host
+
+    if (-not $disableLogging) {
+        Add-Content -Path $logFile -Value "An unexpected error occurred: $($_.Exception.Message)"
+        Add-Content -Path $logFile -Value "Cannot continue with backup, exiting..."
+    }
+
+    Write-Host "Exiting..." -ForegroundColor Red
     Exit
 }
 
@@ -53,14 +69,19 @@ foreach ($folderToBackup in $sourceFoldersToBackup) {
             Write-Host "Success " -ForegroundColor Green -NoNewline
             Write-Host "Copied: $($item.FullName)"
 
-            # Add result of copy to the log
-            Add-Content -Path $logFilePathAndName -Value "Success Copied: $($item.FullName)"
+            
+            if (-not $disableLogging) {
+                # Add result of copy to the log
+                Add-Content -Path $logFile -Value "Success Copied: $($item.FullName)"
+            }
         } catch {
             # Display and log a simple error message
             $errorMessage = "Error: $($_.Exception.Message)"
             Write-Host $errorMessage -ForegroundColor Red 
             
-            Add-Content -Path $logFilePathAndName -Value $errorMessage
+            if (-not $disableLogging) {
+                Add-Content -Path $logFile -Value $errorMessage
+            }
         }
     }
 }
