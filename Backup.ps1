@@ -67,6 +67,9 @@ try {
     Exit
 }
 
+# Open logfile to write to
+$streamWriter = New-Object System.IO.StreamWriter $logFile
+
 # Copy source folders to new backup folder and verify and log
 foreach ($folderToBackup in $sourceFoldersToBackup) {
     # Get folder to be copied name
@@ -94,7 +97,7 @@ foreach ($folderToBackup in $sourceFoldersToBackup) {
 
             if (-not $disableLogging) {
                 # Add result of copy to the log
-                Add-Content -Path $logFile -Value "Success Copied: $($item.FullName)"
+                $streamWriter.WriteLine("Success Copied: $($item.FullName)")
             }
         } catch {
             # Display and log a simple error message
@@ -102,8 +105,11 @@ foreach ($folderToBackup in $sourceFoldersToBackup) {
             Write-Host $errorMessage -ForegroundColor Red 
             
             if (-not $disableLogging) {
-                Add-Content -Path $logFile -Value $errorMessage
+                $streamWriter.WriteLine($errorMessage)
             }
         }
     }
 }
+
+# Close logFile being written to
+$streamWriter.Close()
